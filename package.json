@@ -8,6 +8,8 @@
     "react-dom": "17.0.1",
     "react-scripts": "4.0.0",
     "react-three-fiber": "5.3.1",
+    "semantic-ui-css": "^2.4.1",
+    "semantic-ui-react": "^2.1.1",
     "three": "0.122.0",
     "use-cannon": "0.5.3"
   },
@@ -33,5 +35,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "semantic-ui-ember": "github:Semantic-Org/Semantic-UI-Ember"
   }
 }

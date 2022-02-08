@@ -1,10 +1,21 @@
+import './styles.css'
 import * as THREE from 'three';
-import ReactDOM from 'react-dom'
 import React, { useEffect } from "react";
 import { MapControls, Stars } from "drei";
+import { Button, Dropdown } from 'semantic-ui-react'
 import { Canvas, useThree } from "react-three-fiber";
 import { Physics, usePlane, useBox } from 'use-cannon'
-import './styles.css'
+
+// function SpiffyButton({ children }) {
+//   return (
+//     <button className="fancy" onClick={() => console.log('eyyyy')}>
+//       <span className="top-key"></span>
+//       {children}
+//       <span className="bottom-key-1"></span>
+//       <span className="bottom-key-2"></span>
+//     </button>
+//   );
+// }
 
 function Plane(props) {
   const [ ref ] = usePlane(() => ({
@@ -31,16 +42,29 @@ function Cube(props) {
 
 export default function App() {
   return (
-    <Canvas shadows dpr={[1, 2]} gl={{ alpha: false }} camera={{ position: [0, 10, 0], fov: 45 }}>
-      <MapControls />
-      <Stars />
-      <color attach="background" args={['lightblue']} />
-      <ambientLight />
-      <directionalLight position={[10, 10, 10]} castShadow shadow-mapSize={[2048, 2048]} />
-      <Physics>
-        <Plane position={[-1, -1, -1]} />
-        <Cube position={[0, 0, 0]} />
-      </Physics>
-    </Canvas>
+    <div id="app">
+    <div id="canvas">
+      <Canvas
+        shadows
+        dpr={[1, 2]}
+        gl={{ alpha: false }}
+        camera={{ position: [0, 10, 0], fov: 45 }}>
+        <MapControls />
+        <Stars />
+        <color attach="background" args={['lightblue']} />
+        <ambientLight />
+        <directionalLight position={[10, 10, 10]} castShadow shadow-mapSize={[2048, 2048]} />
+        <Physics>
+          <Plane position={[-1, -1, -1]} />
+          <Cube position={[0, 0, 0]} />
+        </Physics>
+      </Canvas>
+      </div>
+      <div id="panel">
+        <Button primary onClick={() => console.log('eyyyy')}>Add</Button>
+        <Button onClick={() => console.log('eyyyy')}>Remove</Button>
+        <Button onClick={() => console.log('eyyyy')}>Remove All</Button>
+      </div>
+    </div>
   );
 };
