@@ -1,4 +1,8 @@
-# Building a 3D world in react three fiber
+# Andres' Take Home for The3DApp
 
-Build walkthrough in this Youtube video:
-[![Video preview](https://img.youtube.com/vi/FGG0EeMNUl0/0.jpg)](https://www.youtube.com/watch?v=FGG0EeMNUl0)
+This was a blast! I can't remember the last time I had this much fun coding a technical challenge. Thank you so much for the opportunity!
+
+## To View
+```bash
+npm i && npm start
+```
