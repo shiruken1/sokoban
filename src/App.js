@@ -1,50 +1,149 @@
-import './styles.css'
-// import * as THREE from 'three';
+import uuid from 'short-uuid';
 import React, { useState, useEffect } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { Button, Menu, Dropdown } from 'semantic-ui-react';
-import { MapControls, Stars, Edges } from '@react-three/drei';
-import { Physics, usePlane, useBox } from '@react-three/cannon';
+import { MapControls, Stars, Edges, useCursor } from '@react-three/drei';
+import { Physics, usePlane, useBox, useCylinder, useSphere } from '@react-three/cannon';
 
-function Plane(props) {
-  const [ ref ] = usePlane(() => ({
-    rotation: [-Math.PI / 2, 0, 0],
-  }));
+import './styles.css'
+import { Grid } from './Grid';
+import { Panel } from './Panel';
 
-  return (
-    <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]}>
-      <gridHelper args={[50, 50, 'blue', 'blue']} rotation={[-Math.PI / 2, 0, 0]}/>
-    </mesh>
-  );
-}
-
-function Cube({ position, isSelected, color }) {
-  const [ ref ] = useBox(() => ({ mass: 1, rotation: [1, 0, 0], position }))
+const Cube = ({ position, highlightEdges, color }) => {
+  const [ ref, api ] = useBox(() => ({ mass: 1, position }))
+  const [hovered, setHovered] = useState();
+  useCursor(hovered, /*'pointer', 'auto'*/);
+  api.position.set(1,0,0);
 
   return (
     <mesh
       ref={ref}
       castShadow
       receiveShadow
-      // onClick={(event) => click(!clicked)}
-      >
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}>
       <boxGeometry />
       <meshLambertMaterial color={color} />
 
-      <Edges visible={isSelected} scale={1.2} >
-        <meshBasicMaterial transparent color="#333" depthTest={false} />
+      <Edges visible={highlightEdges} scale={1.2} >
+        <meshBasicMaterial transparent color="#333" depthTest={true} />
       </Edges>
 
     </mesh>
   )
 }
 
+const Cylinder = ({ position, highlightEdges, color }) => {
+  const [ ref ] = useCylinder(() => ({ args: [1,1,2], mass: 1, position, rotation: [0, Math.PI / 2, 0] }))
+
+  return (
+    <mesh
+      ref={ref}
+      castShadow
+      receiveShadow>
+      <cylinderGeometry />
+      <meshLambertMaterial color={color} />
+
+      <Edges visible={highlightEdges} scale={2} >
+        <meshBasicMaterial transparent color="#333" depthTest={true} />
+      </Edges>
+
+    </mesh>
+  )
+}
+
+const PrimitivesMap = {
+  Cylinder,
+  Cube
+};
+
 export default function App() {
-  const [ primSelected, setPrimSelected ] = useState('');
+  const [ adding, setAdding ] = useState(false);
+  const [ primitives, setPrimitives ] = useState([
+    {
+      id: uuid.generate(),
+      type: 'Cube',
+      color: 'hotpink',
+      position: [1,9,1],
+      isCurrent: true
+    }]);
+
+  const handleMove = direction => {
+    const otherPrims = primitives.filter(p => !p.isCurrent);
+    const currentPrim = primitives.find(p => p.isCurrent);
+
+console.log('=-=-=- currentPrim: ', currentPrim);
+    const { position } = currentPrim;
+    currentPrim.position = [1,1,0];
+
+    setPrimitives([ ...otherPrims ]);
+    setPrimitives([ ...otherPrims, currentPrim ]);
+  };
+
+  const handleTurn = () => {};
+
+  const handleAdd = (type) => {
+    if(!adding) {
+      setAdding(type);
+    }
+  };
+
+  const handleRemove = removeAll => {
+
+    if(removeAll || primitives.length < 2) {
+      setPrimitives([]);
+    } else {
+
+      const newPrimitivesList = primitives.pop();
+      const lastPrimitive = newPrimitivesList.pop();
+      lastPrimitive.isCurrent = true;
+
+      setPrimitives([ ...newPrimitivesList, lastPrimitive ]);
+    }
+  };
+
+  const handleAddClick = position => {
+    addShape(adding, position)
+  };
+
+  const addShape = (type, position) => {
+    const newPrimitive = {
+      type,
+      position,
+      isCurrent: true,
+      id: uuid.generate(),
+      color: Math.random() * 0xffffff,
+    };
+
+    if(primitives.length === 0) {
+      setPrimitives([newPrimitive]);
+
+    } else {
+      const lastPrimitive = primitives.pop();
+      lastPrimitive.isCurrent = false;
+
+      setPrimitives([ ...primitives, lastPrimitive, newPrimitive ]);
+    }
+
+    setAdding(false);
+  };
+
+  const panelHandlers = { handleMove, handleAdd, handleRemove };
+
+  const scene = primitives.map(({ id, type, position, color, isCurrent }) => {
+
+    const Primitive = PrimitivesMap[type];
+    return <Primitive
+              key={id}
+              color={color}
+              position={position}
+              highlightEdges={isCurrent} />
+  });
 
   return (
     <div id="app">
       <Canvas
+        style={{ cursor: adding ? 'crosshair' : 'auto' }}
         shadows
         dpr={[1, 2]}
         gl={{ alpha: false }}
@@ -55,58 +154,12 @@ export default function App() {
           <ambientLight />
           <directionalLight position={[10, 10, 10]} castShadow shadow-mapSize={[2048, 2048]} />
           <Physics>
-            <Plane position={[-1, -1, -1]} />
-            <Cube color="hotpink" position={[0, 0, 0]} isSelected={true} />
+            <Grid />
+            { scene }
           </Physics>
       </Canvas>
 
-      <div id="panel">
-        <Menu>
-          <Menu.Menu position='left'>
-            <Dropdown
-              item
-              text='Move'
-              upward={true}
-              options={[
-                { key: 1, text: 'North', value: 1 },
-                { key: 2, text: 'East', value: 2 },
-                { key: 3, text: 'South', value: 3 },
-                { key: 4, text: 'West', value: 4 }
-              ]}
-            />
-            <Dropdown
-              item
-              text='Turn'
-              upward={true}
-              options={[
-                { key: 1, text: 'Clockwise', value: 1 },
-                { key: 2, text: 'Counter-Clockwise', value: 2 },
-              ]}
-            />
-          </Menu.Menu>
-          <Menu.Menu position='right'>
-            <Dropdown
-              item
-              text='Add'
-              upward={true}
-              options={[
-                { key: 1, text: 'Red Box', value: 1 },
-                { key: 2, text: 'Green Cylinder', value: 2 },
-                { key: 3, text: 'Blue Pyramid', value: 3 }
-              ]}
-            />
-            <Dropdown
-              item
-              text='Remove'
-              upward={true}
-              options={[
-                { key: 1, text: 'Remove Selected', value: 1 },
-                { key: 2, text: 'Remove All', value: 2 },
-              ]}
-            />
-          </Menu.Menu>
-        </Menu>
-      </div>
+      <Panel id="panel" { ...panelHandlers } />
     </div>
   );
 };
