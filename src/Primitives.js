@@ -1,11 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Edges, useCursor } from '@react-three/drei';
 import { useBox, useCylinder, useSphere } from '@react-three/cannon';
 
 export const Cube = ({ position, highlightEdges, color }) => {
-  const [ ref ] = useBox(() => ({ mass: 1, position }))
+  const [ ref, api ] = useBox(() => ({ mass: 1, position }))
   const [hovered, setHovered] = useState();
   useCursor(hovered, /*'pointer', 'auto'*/);
+
+  useEffect(() => {
+    api.velocity.set(...position);
+  }, [position]);
 
   return (
     <mesh
@@ -14,7 +18,7 @@ export const Cube = ({ position, highlightEdges, color }) => {
       receiveShadow
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}>
-      <boxGeometry />
+      <boxGeometry attach="geometry" />
       <meshLambertMaterial color={color} />
 
       <Edges visible={highlightEdges} scale={1.1} >
@@ -26,9 +30,13 @@ export const Cube = ({ position, highlightEdges, color }) => {
 }
 
 export const Cylinder = ({ position, highlightEdges, color }) => {
-  const [ ref ] = useCylinder(() => ({ mass: 1, position, rotation: [0, 0, -Math.PI / 2] }))
+  const [ ref, api ] = useCylinder(() => ({ mass: 1, position, rotation: [0, 0, -Math.PI / 2] }))
   const [hovered, setHovered] = useState();
   useCursor(hovered, /*'pointer', 'auto'*/);
+
+  useEffect(() => {
+    api.velocity.set(...position);
+  }, [position]);
 
   return (
     <mesh
@@ -49,9 +57,13 @@ export const Cylinder = ({ position, highlightEdges, color }) => {
 }
 
 export const Cone = ({ position, highlightEdges, color }) => {
-  const [ ref ] = useCylinder(() => ({ mass: 1, position, rotation: [0, 0, -Math.PI / 2] }))
+  const [ ref, api ] = useCylinder(() => ({ mass: 1, position, rotation: [0, 0, -Math.PI / 2] }))
   const [hovered, setHovered] = useState();
   useCursor(hovered, /*'pointer', 'auto'*/);
+
+  useEffect(() => {
+    api.velocity.set(...position);
+  }, [position]);
 
   return (
     <mesh
@@ -72,9 +84,13 @@ export const Cone = ({ position, highlightEdges, color }) => {
 }
 
 export const Sphere = ({ position, highlightEdges, color }) => {
-  const [ ref ] = useSphere(() => ({ mass: 1, position, rotation: [0, -Math.PI / 2, -Math.PI / 2] }))
+  const [ ref, api ] = useSphere(() => ({ mass: 1, position, rotation: [0, -Math.PI / 2, -Math.PI / 2] }))
   const [hovered, setHovered] = useState();
   useCursor(hovered, /*'pointer', 'auto'*/);
+
+  useEffect(() => {
+    api.velocity.set(...position);
+  }, [position]);
 
   return (
     <mesh

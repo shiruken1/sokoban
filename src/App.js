@@ -17,7 +17,7 @@ export default function App() {
       id: uuid.generate(),
       type: 'Cube',
       color: 'hotpink',
-      position: [0,3,0],
+      position: [0,5,0],
       isCurrent: true
     }
   ]);
@@ -27,14 +27,30 @@ export default function App() {
       const otherPrims = primitives.filter(p => !p.isCurrent);
       const currentPrim = primitives.find(p => p.isCurrent);
 
-      const { position } = currentPrim;
-      currentPrim.position = [1,1,0];
+      let position = [0,3,0];
+      switch(direction) {
+        case 'Up':
+          position = [0,3,-2];
+        break;
+        case 'Down':
+          position = [0,3,2];
+        break;
+        case 'Right':
+          position = [2,3,0];
+        break;
+        case 'Left':
+          position = [-2,3,0];
+        break;
+        default: break;
+      }
 
-      setPrimitives([ ...otherPrims ]);
+      currentPrim.position = position;
       setPrimitives([ ...otherPrims, currentPrim ]);
     },
 
-    handleTurn: direction => {},
+    handleTurn: direction => {
+
+    },
 
     handleAdd: (type) => {
       if(!adding) {
@@ -57,15 +73,13 @@ export default function App() {
   };
 
   const onAddClick = position => {
-    if(adding) { // Grid's onClick bounces
-      addShape(adding, position);
+    if(!adding) { // Grid's onClick bounces
+      return;
     }
-  };
 
-  const addShape = (type, position) => {
     const newPrimitive = {
-      type,
       position,
+      type: adding,
       isCurrent: true,
       id: uuid.generate(),
       color: Math.random() * 0xffffff,
