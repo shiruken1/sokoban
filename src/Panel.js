@@ -10,10 +10,10 @@ export const Panel = ({ handleMove, handleAdd, handleRemove }) => {
             text='Move'
             upward={true}
             options={[
-              { key: 1, text: 'North', onClick: () => handleMove('North') },
-              { key: 2, text: 'East', onClick: () => handleMove('East') },
-              { key: 3, text: 'South', onClick: () => handleMove('South') },
-              { key: 4, text: 'West', onClick: () => handleMove('West') }
+              { key: 1, text: 'Up', onClick: () => handleMove('Up') },
+              { key: 2, text: 'Right', onClick: () => handleMove('Right') },
+              { key: 3, text: 'Down', onClick: () => handleMove('Down') },
+              { key: 4, text: 'Left', onClick: () => handleMove('Left') }
             ]}
           />
           <Dropdown
@@ -21,8 +21,8 @@ export const Panel = ({ handleMove, handleAdd, handleRemove }) => {
             text='Turn'
             upward={true}
             options={[
-              { key: 1, text: 'Clockwise', value: 1 },
-              { key: 2, text: 'Counter-Clockwise', value: 2 },
+              { key: 1, text: 'Clockwise', value: 'CW' },
+              { key: 2, text: 'Counter-Clockwise', value: 'CCW' },
             ]}
           />
         </Menu.Menu>
@@ -32,9 +32,10 @@ export const Panel = ({ handleMove, handleAdd, handleRemove }) => {
             text='Add'
             upward={true}
             options={[
-              { key: 1, text: 'Box', onClick: () => handleAdd({ type: 'Cube', position: [0,0,0]}) },
-              { key: 2, text: 'Cylinder', onClick: () => handleAdd({ type: 'Cylinder', position: [0,0,0]}) },
-              { key: 3, text: 'Sphere', onClick: () => handleAdd({ type: 'Sphere', position: [0,0,0]}) }
+              { key: 1, text: 'Cube', onClick: () => handleAdd('Cube') },
+              { key: 2, text: 'Cone', onClick: () => handleAdd('Cone') },
+              { key: 3, text: 'Sphere', onClick: () => handleAdd('Sphere') },
+              { key: 4, text: 'Cylinder', onClick: () => handleAdd('Cylinder') },
             ]}
           />
           <Dropdown

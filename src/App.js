@@ -1,61 +1,14 @@
 import uuid from 'short-uuid';
-import React, { useState, useEffect } from 'react';
+import { Vector3 } from 'three';
+import React, { useState } from 'react';
+import { Physics } from '@react-three/cannon';
 import { Canvas, useThree } from '@react-three/fiber';
-import { Button, Menu, Dropdown } from 'semantic-ui-react';
-import { MapControls, Stars, Edges, useCursor } from '@react-three/drei';
-import { Physics, usePlane, useBox, useCylinder, useSphere } from '@react-three/cannon';
+import { MapControls, Stars } from '@react-three/drei';
 
 import './styles.css'
 import { Grid } from './Grid';
 import { Panel } from './Panel';
-
-const Cube = ({ position, highlightEdges, color }) => {
-  const [ ref, api ] = useBox(() => ({ mass: 1, position }))
-  const [hovered, setHovered] = useState();
-  useCursor(hovered, /*'pointer', 'auto'*/);
-  api.position.set(1,0,0);
-
-  return (
-    <mesh
-      ref={ref}
-      castShadow
-      receiveShadow
-      onPointerOver={() => setHovered(true)}
-      onPointerOut={() => setHovered(false)}>
-      <boxGeometry />
-      <meshLambertMaterial color={color} />
-
-      <Edges visible={highlightEdges} scale={1.2} >
-        <meshBasicMaterial transparent color="#333" depthTest={true} />
-      </Edges>
-
-    </mesh>
-  )
-}
-
-const Cylinder = ({ position, highlightEdges, color }) => {
-  const [ ref ] = useCylinder(() => ({ args: [1,1,2], mass: 1, position, rotation: [0, Math.PI / 2, 0] }))
-
-  return (
-    <mesh
-      ref={ref}
-      castShadow
-      receiveShadow>
-      <cylinderGeometry />
-      <meshLambertMaterial color={color} />
-
-      <Edges visible={highlightEdges} scale={2} >
-        <meshBasicMaterial transparent color="#333" depthTest={true} />
-      </Edges>
-
-    </mesh>
-  )
-}
-
-const PrimitivesMap = {
-  Cylinder,
-  Cube
-};
+import * as PrimitivesMap from './Primitives';
 
 export default function App() {
   const [ adding, setAdding ] = useState(false);
@@ -64,46 +17,49 @@ export default function App() {
       id: uuid.generate(),
       type: 'Cube',
       color: 'hotpink',
-      position: [1,9,1],
+      position: [0,3,0],
       isCurrent: true
-    }]);
+    }
+  ]);
 
-  const handleMove = direction => {
-    const otherPrims = primitives.filter(p => !p.isCurrent);
-    const currentPrim = primitives.find(p => p.isCurrent);
+  const panelHandlers = {
+    handleMove: direction => {
+      const otherPrims = primitives.filter(p => !p.isCurrent);
+      const currentPrim = primitives.find(p => p.isCurrent);
 
-console.log('=-=-=- currentPrim: ', currentPrim);
-    const { position } = currentPrim;
-    currentPrim.position = [1,1,0];
+      const { position } = currentPrim;
+      currentPrim.position = [1,1,0];
 
-    setPrimitives([ ...otherPrims ]);
-    setPrimitives([ ...otherPrims, currentPrim ]);
-  };
+      setPrimitives([ ...otherPrims ]);
+      setPrimitives([ ...otherPrims, currentPrim ]);
+    },
 
-  const handleTurn = () => {};
+    handleTurn: direction => {},
 
-  const handleAdd = (type) => {
-    if(!adding) {
-      setAdding(type);
+    handleAdd: (type) => {
+      if(!adding) {
+        setAdding(type);
+      }
+    },
+
+    handleRemove: removeAll => {
+      if(removeAll || primitives.length < 2) {
+        setPrimitives([]);
+      } else {
+
+        const newPrimitivesList = primitives.pop();
+        const lastPrimitive = newPrimitivesList.pop();
+        lastPrimitive.isCurrent = true;
+
+        setPrimitives([ ...newPrimitivesList, lastPrimitive ]);
+      }
     }
   };
 
-  const handleRemove = removeAll => {
-
-    if(removeAll || primitives.length < 2) {
-      setPrimitives([]);
-    } else {
-
-      const newPrimitivesList = primitives.pop();
-      const lastPrimitive = newPrimitivesList.pop();
-      lastPrimitive.isCurrent = true;
-
-      setPrimitives([ ...newPrimitivesList, lastPrimitive ]);
+  const onAddClick = position => {
+    if(adding) { // Grid's onClick bounces
+      addShape(adding, position);
     }
-  };
-
-  const handleAddClick = position => {
-    addShape(adding, position)
   };
 
   const addShape = (type, position) => {
@@ -128,8 +84,6 @@ console.log('=-=-=- currentPrim: ', currentPrim);
     setAdding(false);
   };
 
-  const panelHandlers = { handleMove, handleAdd, handleRemove };
-
   const scene = primitives.map(({ id, type, position, color, isCurrent }) => {
 
     const Primitive = PrimitivesMap[type];
@@ -143,20 +97,20 @@ console.log('=-=-=- currentPrim: ', currentPrim);
   return (
     <div id="app">
       <Canvas
-        style={{ cursor: adding ? 'crosshair' : 'auto' }}
+        style={{ cursor: adding ? 'crosshair' : 'inherit' }}
         shadows
         dpr={[1, 2]}
         gl={{ alpha: false }}
         camera={{ position: [0, 10, 0], fov: 45 }}>
           <MapControls />
           <Stars />
-          <color attach="background" args={['lightblue']} />
           <ambientLight />
           <directionalLight position={[10, 10, 10]} castShadow shadow-mapSize={[2048, 2048]} />
           <Physics>
-            <Grid />
+            <Grid handleAddClick={onAddClick} />
             { scene }
           </Physics>
+          <color attach="background" args={['lightblue']} />
       </Canvas>
 
       <Panel id="panel" { ...panelHandlers } />
