@@ -5,7 +5,7 @@ import { usePlane } from '@react-three/cannon';
 const REASONABLE_DROP_HEIGHT = 5;
 
 export const Grid = ({ handleAddClick }) => {
-  const { mouse, camera, intersect } = useThree();
+  const { mouse, camera } = useThree();
   const [ ref ] = usePlane(() => ({
     rotation: [-Math.PI / 2, 0, 0]
   }));
@@ -27,10 +27,10 @@ export const Grid = ({ handleAddClick }) => {
   return (
     <mesh ref={ref} onClick={handleClick}>
       <meshStandardMaterial color={"#dddddd"} />
-      <planeGeometry attach="geometry" args={[ 10, 10 ]} />
+      <planeGeometry attach="geometry" args={[ 50, 50 ]} />
       <gridHelper
         position={[ 0, 0, 0.005 ]} // offset to stop z-fighting
-        args={[ 10, 10, 'blue', 'blue' ]}
+        args={[ 50, 50, 'blue', 'blue' ]}
         rotation={[ -Math.PI / 2, 0, 0 ]} // rotated to match the plane
       />
     </mesh>

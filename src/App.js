@@ -14,11 +14,13 @@ export default function App() {
   const [ adding, setAdding ] = useState(false);
   const [ primitives, setPrimitives ] = useState([
     {
-      id: uuid.generate(),
+      rotation: 0,
       type: 'Cube',
+      isCurrent: true,
       color: 'hotpink',
-      position: [0,5,0],
-      isCurrent: true
+      id: uuid.generate(),
+      initPosition: [0,3,0],
+      movePosition: [0,0,0],
     }
   ]);
 
@@ -27,29 +29,45 @@ export default function App() {
       const otherPrims = primitives.filter(p => !p.isCurrent);
       const currentPrim = primitives.find(p => p.isCurrent);
 
-      let position = [0,3,0];
+      let position = [0,0,0];
       switch(direction) {
         case 'Up':
-          position = [0,3,-2];
+          position = [0,0,-1];
         break;
         case 'Down':
-          position = [0,3,2];
+          position = [0,0,1];
         break;
         case 'Right':
-          position = [2,3,0];
+          position = [1,0,0];
         break;
         case 'Left':
-          position = [-2,3,0];
+          position = [-1,0,0];
         break;
         default: break;
       }
 
-      currentPrim.position = position;
+      currentPrim.movePosition = position;
       setPrimitives([ ...otherPrims, currentPrim ]);
     },
 
     handleTurn: direction => {
+      const fortyFive = Math.PI / 4;
+      const otherPrims = primitives.filter(p => !p.isCurrent);
+      const currentPrim = primitives.find(p => p.isCurrent);
 
+      let { rotation } = currentPrim;
+      switch(direction) {
+        case 'CW':
+          rotation += fortyFive;
+        break;
+        case 'CCW':
+          rotation -= fortyFive;
+        break;
+        default: break;
+      }
+
+      currentPrim.rotation = rotation;
+      setPrimitives([ ...otherPrims, currentPrim ]);
     },
 
     handleAdd: (type) => {
@@ -64,24 +82,26 @@ export default function App() {
       } else {
 
         const newPrimitivesList = primitives.pop();
-        const lastPrimitive = newPrimitivesList.pop();
+        const lastPrimitive = primitives.pop();
         lastPrimitive.isCurrent = true;
 
-        setPrimitives([ ...newPrimitivesList, lastPrimitive ]);
+        setPrimitives([ ...primitives, lastPrimitive ]);
       }
     }
   };
 
-  const onAddClick = position => {
+  const onAddClick = initPosition => {
     if(!adding) { // Grid's onClick bounces
       return;
     }
 
     const newPrimitive = {
-      position,
+      rotation: 0,
+      initPosition,
       type: adding,
       isCurrent: true,
       id: uuid.generate(),
+      movePosition: [0,0,0],
       color: Math.random() * 0xffffff,
     };
 
@@ -98,14 +118,10 @@ export default function App() {
     setAdding(false);
   };
 
-  const scene = primitives.map(({ id, type, position, color, isCurrent }) => {
+  const scene = primitives.map(props => {
 
-    const Primitive = PrimitivesMap[type];
-    return <Primitive
-              key={id}
-              color={color}
-              position={position}
-              highlightEdges={isCurrent} />
+    const Primitive = PrimitivesMap[props.type];
+    return <Primitive key={props.id} {...props} highlightEdges={props.isCurrent} />
   });
 
   return (

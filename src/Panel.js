@@ -1,6 +1,6 @@
 import { Menu, Dropdown } from 'semantic-ui-react';
 
-export const Panel = ({ handleMove, handleAdd, handleRemove }) => {
+export const Panel = ({ handleMove, handleTurn, handleAdd, handleRemove }) => {
   return (
     <div id="panel">
       <Menu>
@@ -21,8 +21,8 @@ export const Panel = ({ handleMove, handleAdd, handleRemove }) => {
             text='Turn'
             upward={true}
             options={[
-              { key: 1, text: 'Clockwise', value: 'CW' },
-              { key: 2, text: 'Counter-Clockwise', value: 'CCW' },
+              { key: 1, text: 'Clockwise', onClick: () => handleTurn('CW') },
+              { key: 2, text: 'Counter-Clockwise', onClick: () => handleTurn('CCW') },
             ]}
           />
         </Menu.Menu>
